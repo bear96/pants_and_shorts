@@ -1,4 +1,5 @@
 import openai
+import time
 
 def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=0):
     success = False

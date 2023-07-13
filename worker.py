@@ -1,5 +1,6 @@
 from utils import get_completion_from_messages
 import numpy as np
+import time
 
 class worker():
     def __init__(self, unique_id, model, name, traits, clothes = None):

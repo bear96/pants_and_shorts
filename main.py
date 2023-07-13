@@ -16,7 +16,7 @@ df = pd.DataFrame(loaded_lists)
 df = df.T
 df.to_csv("data.csv")
 
-for i in df.columns():
+for i in df.columns:
     plt.plot(i)
 
 plt.grid()
