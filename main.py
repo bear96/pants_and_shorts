@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import openai
 from tqdm import tqdm
 
-openai.api_key = "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"
+openai.api_key = ""
 loaded_lists = []
 for i in tqdm(range(10)):
     print(f"-------Run - {i+1}--------")
