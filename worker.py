@@ -1,9 +1,12 @@
 from utils import get_completion_from_messages
 import numpy as np
 import time
+from logging_config import configure_logger
+
+worker_logger = configure_logger(name = "workers", log_file="workers_log.txt")
 
 class worker():
-    def __init__(self, unique_id, model, name, traits, clothes = None):
+    def __init__(self, unique_id, model, name, traits, clothes = None, static = False):
         self.unique_id = unique_id
         self.clothes = clothes
         self.mem = np.array([],dtype="S")
@@ -11,11 +14,12 @@ class worker():
         self.clothes_info = None
         self.name = name
         self.traits = traits
+        self.static = static
 
     def decide_clothes(self):
         reasoning, response = self.get_response()
-        print(f"{self.name}'s reasoning: {reasoning}")
-        print(f"{self.name}'s response: {response}")
+        worker_logger.info(f"{self.name}'s reasoning: {reasoning}")
+        worker_logger.info(f"{self.name}'s response: {response}")
         if response == "pants":
             self.clothes = "pants"
             self.mem = np.append(self.mem,f"You chose to wear pants yesterday.")
@@ -23,8 +27,8 @@ class worker():
             self.clothes = "shorts"
             self.mem = np.append(self.mem,f"You chose to wear shorts yesterday.")
         else:
-            print("Warning! Response was neither pants nor shorts. Defaulting with pants.")
-            print(f"Response was: {response}")
+            worker_logger.warning("Warning! Response was neither pants nor shorts. Defaulting with pants.")
+            worker_logger.warning(f"Response was: {response}")
             self.clothes = "pants"
             self.mem = np.append(self.mem,f"You chose to wear pants yesterday.")
 
@@ -35,11 +39,10 @@ class worker():
             relevant_mems = self.mem[-1]
 
         question_prompt = f"""
-        You are {self.name}. 
+        You are {self.name}. You are a {self.traits} person.
         You work in an office with 9 other people. You have work today. You need to decide between wearing pants or shorts to work. The weather is appropriate for either pants or shorts.
         {relevant_mems}
         {self.clothes_info}
-
         Based on the above context, you need to choose whether to wear pants or shorts. You must provide your reasoning for your choice and then your response in one word.
         For example, if your answer is "pants", your response will be:
         Reasoning: [Your reason to choose to wear pants]
@@ -67,13 +70,16 @@ class worker():
             reasoning = reasoning.strip()
             # print(reasoning, response)
         except:
-            print("Reasoning or response were not parsed correctly.")
-            print(f"Output: {output}")
+            worker_logger.warning("Reasoning or response were not parsed correctly.")
+            worker_logger.warning(f"Output: {output}")
             response = "pants"
             reasoning = None
         return reasoning.strip().lower(), response.strip().lower()
 
     def step(self):
-        self.decide_clothes()
+        if not self.static:
+            self.decide_clothes()
+        else:
+            pass
 
 
